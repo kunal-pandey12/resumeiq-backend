@@ -52,12 +52,6 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // BCrypt — password ko hash karke save karta hai, seedha nahi
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
     // Login ke time email + password verify karta hai
     @Bean
     public AuthenticationManager authenticationManager(

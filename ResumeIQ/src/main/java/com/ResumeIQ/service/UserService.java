@@ -3,6 +3,7 @@ package com.ResumeIQ.service;
 import com.ResumeIQ.dto.UserDto;
 import com.ResumeIQ.entity.User;
 import com.ResumeIQ.repo.UserRepo;
+import com.ResumeIQ.entity.Role;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -24,6 +25,7 @@ public class UserService implements UserDetailsService {
         user.setName(userDTO.getName());
         user.setEmail(userDTO.getEmail());
         user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+        user.setRole(userDTO.getRole() != null ? userDTO.getRole() : Role.USER);
         return userRepository.save(user);
     }
 
