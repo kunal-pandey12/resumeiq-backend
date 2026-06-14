@@ -19,6 +19,10 @@ import java.nio.file.Paths;
 @Service
 public class ResumeService {
 
+
+    @Autowired
+    private GeminiService geminiService;
+
     @Autowired
     private ResumeRepo resumeRepo;
 
@@ -50,12 +54,17 @@ public class ResumeService {
         System.out.println("Extracted text length: " +
                 (extractedText != null ? extractedText.length() : "NULL"));
 
+
         // Database mein save karo
         Resume resume = new Resume();
         resume.setUser(user);
         resume.setFileName(fileName);
         resume.setFilePath(filePath.toString());
         resume.setExtractedText(extractedText);
+
+        // AI se resume analyze karwao
+        String aiAnalysis = geminiService.analyzeResume(extractedText);
+        resume.setAiAnalysis(aiAnalysis);
 
         return resumeRepo.save(resume);
     }

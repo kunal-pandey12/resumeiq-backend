@@ -1,0 +1,67 @@
+package com.ResumeIQ.service;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+// Gemini AI se baat karne wali service
+@Service
+public class GeminiService {
+
+    // application.properties se key aur url uthao
+    @Value("${gemini.api.key}")
+    private String apiKey;
+
+    @Value("${gemini.api.url}")
+    private String apiUrl;
+
+    private final RestTemplate restTemplate = new RestTemplate();
+
+    // Resume ka text bhejo, AI se analysis lo
+    public String analyzeResume(String resumeText) {
+
+        // Gemini ko jo prompt bhejna hai
+        String prompt = "Analyze this resume and give:\n" +
+                "1. ATS Score out of 100\n" +
+                "2. Strengths\n" +
+                "3. Weaknesses\n" +
+                "4. Suggestions to improve\n\n" +
+                "Resume:\n" + resumeText;
+
+        // Gemini API ka required JSON format
+        Map<String, Object> requestBody = new HashMap<>();
+        Map<String, Object> content = new HashMap<>();
+        Map<String, Object> part = new HashMap<>();
+
+        part.put("text", prompt);
+        content.put("parts", List.of(part));
+        requestBody.put("contents", List.of(content));
+
+        // URL mein API key add karo
+        String urlWithKey = apiUrl + "?key=" + apiKey;
+
+        // Gemini ko request bhejo aur response lo
+        Map response = restTemplate.postForObject(urlWithKey, requestBody, Map.class);
+
+        // Response ke andar se text nikalo
+        return extractTextFromResponse(response);
+    }
+
+    // Gemini ke response se sirf text nikalta hai
+    private String extractTextFromResponse(Map response) {
+        try {
+            List candidates = (List) response.get("candidates");
+            Map firstCandidate = (Map) candidates.get(0);
+            Map content = (Map) firstCandidate.get("content");
+            List parts = (List) content.get("parts");
+            Map firstPart = (Map) parts.get(0);
+            return (String) firstPart.get("text");
+        } catch (Exception e) {
+            return "AI response error: " + e.getMessage();
+        }
+    }
+}

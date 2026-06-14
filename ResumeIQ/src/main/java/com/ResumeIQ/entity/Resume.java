@@ -29,6 +29,9 @@ public class Resume {
     @Column(name = "uploaded_at")
     private LocalDateTime uploadedAt;
 
+    @Column(columnDefinition = "TEXT")
+    private String aiAnalysis;
+
     @PrePersist
     public void prePersist() {
         this.uploadedAt = LocalDateTime.now();
