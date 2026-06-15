@@ -51,6 +51,33 @@ public class GeminiService {
         return extractTextFromResponse(response);
     }
 
+    // Resume aur Job Description ko match krne ke liye
+    public String matchResumeWithJD(String resumeText, String jobDescription) {
+
+        String prompt = "Compare this resume with the job description.\n" +
+                "Give:\n" +
+                "1. Match Percentage (0-100)\n" +
+                "2. Matching Skills\n" +
+                "3. Missing Skills (Skill Gap)\n" +
+                "4. Suggestions to improve match\n\n" +
+                "Resume:\n" + resumeText + "\n\n" +
+                "Job Description:\n" + jobDescription;
+
+        Map<String, Object> requestBody = new HashMap<>();
+        Map<String, Object> content = new HashMap<>();
+        Map<String, Object> part = new HashMap<>();
+
+        part.put("text", prompt);
+        content.put("parts", List.of(part));
+        requestBody.put("contents", List.of(content));
+
+        String urlWithKey = apiUrl + "?key=" + apiKey;
+
+        Map response = restTemplate.postForObject(urlWithKey, requestBody, Map.class);
+
+        return extractTextFromResponse(response);
+    }
+
     // Gemini ke response se sirf text nikalta hai
     private String extractTextFromResponse(Map response) {
         try {

@@ -42,6 +42,23 @@ public class ResumeController {
                     .body("Upload failed: " + e.getMessage());
         }
     }
+    // POST /api/resume/match — resume ka latest text + JD bhejo, match result milega
+    @PostMapping("/match")
+    public ResponseEntity<?> matchWithJD(
+            @RequestParam("resumeId") Long resumeId,
+            @RequestParam("jobDescription") String jobDescription,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        try {
+            User user = (User) userService
+                    .loadUserByUsername(userDetails.getUsername());
+
+            String result = resumeService.matchResumeWithJob(resumeId, jobDescription, user);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Match failed: " + e.getMessage());
+        }
+    }
 
     // User ke saare resumes liya
     @GetMapping("/my")
