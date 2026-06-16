@@ -77,6 +77,36 @@ public class GeminiService {
 
         return extractTextFromResponse(response);
     }
+    // Resume ke basis pe interview questions generate
+    public String generateInterviewQuestions(String resumeText) {
+
+        String prompt = "Based on this resume, generate:\n" +
+                "1. 5 Technical interview questions (related to skills/projects mentioned)\n" +
+                "2. 3 HR/behavioral interview questions\n" +
+                "3. Suggested answers/tips for each technical question\n\n" +
+                "Resume:\n" + resumeText;
+
+        Map<String, Object> requestBody = new HashMap<>();
+        Map<String, Object> content = new HashMap<>();
+        Map<String, Object> part = new HashMap<>();
+
+        part.put("text", prompt);
+        content.put("parts", List.of(part));
+        requestBody.put("contents", List.of(content));
+
+        String urlWithKey = apiUrl + "?key=" + apiKey;
+
+        for (int i = 0; i < 3; i++) {
+            try {
+                Map response = restTemplate.postForObject(urlWithKey, requestBody, Map.class);
+                return extractTextFromResponse(response);
+            } catch (Exception e) {
+                if (i == 2) return "AI service is busy right now. Please try again in a minute.";
+                try { Thread.sleep(2000); } catch (InterruptedException ignored) {}
+            }
+        }
+        return "AI service error.";
+    }
 
     // Gemini ke response se sirf text nikalta hai
     private String extractTextFromResponse(Map response) {

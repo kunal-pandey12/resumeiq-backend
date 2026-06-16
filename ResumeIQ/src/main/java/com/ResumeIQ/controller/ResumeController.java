@@ -2,6 +2,7 @@ package com.ResumeIQ.controller;
 
 import com.ResumeIQ.entity.Resume;
 import com.ResumeIQ.entity.User;
+import com.ResumeIQ.service.GeminiService;
 import com.ResumeIQ.service.ResumeService;
 import com.ResumeIQ.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 // Resume upload aur fetch ke liye APIs
 @RestController
@@ -23,6 +25,9 @@ public class ResumeController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private GeminiService geminiService;
 
     // Resume upload karo — token se user pata chalega
     @PostMapping("/upload")
@@ -61,7 +66,7 @@ public class ResumeController {
     }
 
     // User ke saare resumes liya
-    @GetMapping("/my")
+    @GetMapping("/getMyResumes")
     public ResponseEntity<List<Resume>> getMyResumes(
             @AuthenticationPrincipal UserDetails userDetails) {
 
@@ -69,5 +74,21 @@ public class ResumeController {
                 .loadUserByUsername(userDetails.getUsername());
         List<Resume> resumes = resumeService.getResumesByUser(user);
         return ResponseEntity.ok(resumes);
+    }
+    // GET /api/resume/interview-questions — resume ID dekar interview questions lo
+    @GetMapping("/interview-questions")
+    public ResponseEntity<?> getInterviewQuestions(
+            @RequestParam("resumeId") Long resumeId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        try {
+            User user = (User) userService
+                    .loadUserByUsername(userDetails.getUsername());
+
+            String result = resumeService.generateInterviewQuestions(resumeId, user);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Failed: " + e.getMessage());
+        }
     }
 }

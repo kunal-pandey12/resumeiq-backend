@@ -90,4 +90,11 @@ public class ResumeService {
 
         return geminiService.matchResumeWithJD(resume.getExtractedText(), jobDescription);
     }
+    // Resume ke basis pe interview questions generate karo
+    public String generateInterviewQuestions(Long resumeId, User user) {
+        Resume resume = resumeRepo.findById(resumeId)
+                .orElseThrow(() -> new RuntimeException("Resume not found"));
+
+        return geminiService.generateInterviewQuestions(resume.getExtractedText());
+    }
 }
