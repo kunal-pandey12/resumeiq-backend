@@ -7,8 +7,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class ResumeIqApplication {
 
 	public static void main(String[] args) {
-
         SpringApplication.run(ResumeIqApplication.class, args);
 	}
-
 }
