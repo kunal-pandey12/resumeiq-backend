@@ -1,12 +1,16 @@
 package com.ResumeIQ.service;
 
+import com.ResumeIQ.dto.SkillResourceDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 // Gemini AI se baat karne wali service
 @Service
@@ -106,6 +110,72 @@ public class GeminiService {
             }
         }
         return "AI service error.";
+    }
+
+    // ================================================
+// NEW METHOD 1 (Skill Gap Learning Path ke liye)
+// Resume aur JD compare karke missing skills + priority + learning resources nikalta hai
+// ================================================
+    public String getSkillGapAnalysis(String resumeText, String jobDescription) {
+
+        String prompt = "Compare this resume with the job description.\n" +
+                "Find the missing skills and for each missing skill give:\n" +
+                "1. priority (High/Medium/Low)\n" +
+                "2. 2 learning resources (course name + platform)\n\n" +
+                "Reply STRICTLY in this JSON format, no extra text:\n" +
+                "{ \"missingSkills\": [ { \"skill\": \"Docker\", \"priority\": \"High\", " +
+                "\"resources\": [\"Docker Crash Course - freeCodeCamp\", \"Docker for Beginners - Udemy\"] } ] }\n\n" +
+                "Resume:\n" + resumeText + "\n\n" +
+                "Job Description:\n" + jobDescription;
+
+        Map<String, Object> requestBody = new HashMap<>();
+        Map<String, Object> content = new HashMap<>();
+        Map<String, Object> part = new HashMap<>();
+
+        part.put("text", prompt);
+        content.put("parts", List.of(part));
+        requestBody.put("contents", List.of(content));
+
+        String urlWithKey = apiUrl + "?key=" + apiKey;
+
+        Map response = restTemplate.postForObject(urlWithKey, requestBody, Map.class);
+
+        return extractTextFromResponse(response);
+    }
+
+    // ================================================
+// NEW METHOD 2 (Skill Gap Learning Path ke liye)
+// Gemini se mila hua JSON text ko SkillResourceDto list mein convert karta hai
+// ================================================
+    public List<SkillResourceDto> parseSkillGapResponse(String aiText) {
+        List<SkillResourceDto> skillResourceList = new ArrayList<>();
+
+        try {
+            String cleanedText = aiText.replace("```json", "").replace("```", "").trim();
+
+            JSONObject rootObject = new JSONObject(cleanedText);
+            JSONArray skillsArray = rootObject.getJSONArray("missingSkills");
+
+            for (int i = 0; i < skillsArray.length(); i++) {
+                JSONObject skillObject = skillsArray.getJSONObject(i);
+
+                String skill = skillObject.getString("skill");
+                String priority = skillObject.getString("priority");
+
+                List<String> resources = new ArrayList<>();
+                JSONArray resourcesArray = skillObject.getJSONArray("resources");
+                for (int j = 0; j < resourcesArray.length(); j++) {
+                    resources.add(resourcesArray.getString(j));
+                }
+
+                skillResourceList.add(new SkillResourceDto(skill, priority, resources));
+            }
+
+        } catch (Exception e) {
+            System.out.println("Skill gap parsing error: " + e.getMessage());
+        }
+
+        return skillResourceList;
     }
 
     // Gemini ke response se sirf text nikalta hai

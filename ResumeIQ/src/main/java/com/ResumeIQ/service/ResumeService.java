@@ -1,5 +1,6 @@
 package com.ResumeIQ.service;
 
+import com.ResumeIQ.dto.SkillResourceDto;
 import com.ResumeIQ.entity.Resume;
 import com.ResumeIQ.entity.User;
 import com.ResumeIQ.repo.ResumeRepo;
@@ -96,5 +97,13 @@ public class ResumeService {
                 .orElseThrow(() -> new RuntimeException("Resume not found"));
 
         return geminiService.generateInterviewQuestions(resume.getExtractedText());
+    }
+
+    //  — Skill Gap Learning Path: missing skills + priority + resources deta hai
+    public java.util.List<SkillResourceDto> getSkillGapResources(Long resumeId, String jobDescription, User user) {
+        Resume resume = resumeRepo.findById(resumeId)
+                .orElseThrow(() -> new RuntimeException("Resume not found"));
+        String aiResponse = geminiService.getSkillGapAnalysis(resume.getExtractedText(), jobDescription);
+        return geminiService.parseSkillGapResponse(aiResponse);
     }
 }

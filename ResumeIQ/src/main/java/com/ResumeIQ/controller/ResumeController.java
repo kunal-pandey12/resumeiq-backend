@@ -1,5 +1,6 @@
 package com.ResumeIQ.controller;
 
+import com.ResumeIQ.dto.SkillResourceDto;
 import com.ResumeIQ.entity.Resume;
 import com.ResumeIQ.entity.User;
 import com.ResumeIQ.service.GeminiService;
@@ -86,6 +87,23 @@ public class ResumeController {
                     .loadUserByUsername(userDetails.getUsername());
 
             String result = resumeService.generateInterviewQuestions(resumeId, user);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Failed: " + e.getMessage());
+        }
+    }
+    // Skill Gap Learning Path: missing skills + priority + resources deta hai
+    @PostMapping("/skill-gap")
+    public ResponseEntity<?> getSkillGapResources(
+            @RequestParam("resumeId") Long resumeId,
+            @RequestBody String jobDescription,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        try {
+            User user = (User) userService
+                    .loadUserByUsername(userDetails.getUsername());
+
+            java.util.List<SkillResourceDto> result = resumeService.getSkillGapResources(resumeId, jobDescription, user);
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Failed: " + e.getMessage());

@@ -60,6 +60,22 @@
             <artifactId>pdfbox</artifactId>
             <version>3.0.1</version>
         </dependency>
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20240303</version>
+        </dependency>
+        <!--
+    Dependency name: org.json
+    Kya karta hai: Ye ek JSON parsing library hai. Iske andar JSONObject
+    aur JSONArray classes milti hain jo kisi bhi JSON text (String) ko
+    padhkar usme se values nikalne ke kaam aati hain.
+
+    Kaha use ho raha hai: GeminiService.java mein — jab Gemini AI JSON
+    format mein response deta hai (missing skills + priority + resources),
+    us JSON text ko yahi library parse karke SkillResourceDto object mein
+    convert karti hai.
+-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
